@@ -6,7 +6,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
-  JoinTable,
 } from 'typeorm';
 
 @Entity('customers')
@@ -26,11 +25,7 @@ class Customer {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => Order, () => Customer, {
-    eager: true,
-    cascade: true,
-  })
-  @JoinTable()
+  @OneToMany(_type => Order, order => order.customer)
   customer_orders: Order[];
 }
 

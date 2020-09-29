@@ -6,7 +6,6 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
-  JoinTable,
   Column,
 } from 'typeorm';
 
@@ -25,11 +24,7 @@ class Order {
   @Column()
   customer_id: string;
 
-  @OneToMany(() => OrdersProducts, () => Order, {
-    eager: true,
-    cascade: true,
-  })
-  @JoinTable()
+  @OneToMany(_type => OrdersProducts, orderProducts => orderProducts.order)
   order_products: OrdersProducts[];
 
   @CreateDateColumn()

@@ -37,7 +37,44 @@ class CreateOrderService {
       throw new AppError('Customer not found.');
     }
 
-    const order = await this.ordersRepository.create({ customer, products });
+    // Retorna um objeto contendo somente os ID's dos produtos solicitados
+    const listaIdProducts = products.map(product => {
+      return { id: product.id };
+    });
+
+    // Retorna uma lista com todos os dados dos produtos com os ID's solicitados
+    const productData = await this.productsRepository.findAllById(
+      listaIdProducts,
+    );
+
+    // Para cada produto solicitado, o item na lista de todos os dados dos produtos,
+    // e retorna um novo array para poder preencher o preço
+    const newProducts = products.map(productItem => {
+      const myProduct = productData.filter(
+        product => product.id === productItem.id,
+      );
+
+      if (!myProduct.length) {
+        throw new AppError('Produto inválido.');
+      }
+
+      if (productItem.quantity > myProduct[0].quantity) {
+        throw new AppError('Produto não possui estoque disponível.');
+      }
+
+      return {
+        product_id: productItem.id,
+        price: myProduct[0].price,
+        quantity: productItem.quantity,
+      };
+    });
+
+    const order = await this.ordersRepository.create({
+      customer,
+      products: newProducts,
+    });
+
+    return order;
   }
 }
 
