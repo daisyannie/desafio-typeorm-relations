@@ -47,7 +47,7 @@ class CreateOrderService {
       listaIdProducts,
     );
 
-    // Para cada produto solicitado, o item na lista de todos os dados dos produtos,
+    // Para cada produto solicitado, busca o item na lista de todos os dados dos produtos,
     // e retorna um novo array para poder preencher o preço
     const newProducts = products.map(productItem => {
       const myProduct = productData.filter(
@@ -65,14 +65,33 @@ class CreateOrderService {
       return {
         product_id: productItem.id,
         price: myProduct[0].price,
-        quantity: productItem.quantity,
+        quantity: myProduct[0].quantity - productItem.quantity,
       };
     });
 
-    const order = await this.ordersRepository.create({
+    const idQtdeProduct = newProducts.map(item => {
+      return {
+        id: item.product_id,
+        quantity: item.quantity,
+      };
+    });
+
+    await this.productsRepository.updateQuantity(idQtdeProduct);
+
+    const { id } = await this.ordersRepository.create({
       customer,
       products: newProducts,
     });
+
+    const order = await this.ordersRepository.findById(id);
+
+    if (!order) {
+      throw new AppError('Erro ao cadastrar pedido.');
+    }
+
+    // TODO:
+    // 1. Não está gravando o preço na tabela orders_products
+    // 2. Está retornando a quantidade do estoque no json e não a quantidade do pedido
 
     return order;
   }

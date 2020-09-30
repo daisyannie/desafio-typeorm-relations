@@ -29,7 +29,7 @@ class Product {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(_type => OrdersProducts, orderProducts => orderProducts.product)
+  @OneToMany(() => OrdersProducts, order_products => order_products.product)
   order_products: OrdersProducts[];
 }
 
