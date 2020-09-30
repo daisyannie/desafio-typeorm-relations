@@ -65,14 +65,19 @@ class CreateOrderService {
       return {
         product_id: productItem.id,
         price: myProduct[0].price,
-        quantity: myProduct[0].quantity - productItem.quantity,
+        quantity: productItem.quantity,
       };
     });
 
-    const idQtdeProduct = newProducts.map(item => {
+    // Monta um novo array contendo a quantidade do estoque atualizada para salvar os dados
+    const idQtdeProduct = productData.map(item => {
+      const productOriginal = products.filter(
+        product => product.id === item.id,
+      );
+
       return {
-        id: item.product_id,
-        quantity: item.quantity,
+        id: item.id,
+        quantity: item.quantity - productOriginal[0].quantity,
       };
     });
 
@@ -88,10 +93,6 @@ class CreateOrderService {
     if (!order) {
       throw new AppError('Erro ao cadastrar pedido.');
     }
-
-    // TODO:
-    // 1. Não está gravando o preço na tabela orders_products
-    // 2. Está retornando a quantidade do estoque no json e não a quantidade do pedido
 
     return order;
   }
